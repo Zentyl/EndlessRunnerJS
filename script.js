@@ -8,12 +8,14 @@ class Game {
     playerFrameWidth = 160; // szerokosc 1 klatki gracza 
     playerFrameHeight = 90; // wysokosc 1 klatki gracza
     drawPosX = 0;
-    drawPosY = 700 - this.playerFrameHeight; // pozycja gracza na osi Y
     playerX = 50; // pozycja gracza na osi X
+    playerY = 700 - this.playerFrameHeight; // pozycja gracza na osi Y
     jumpStrength = 0; // sila skoku
     isJumping = false; // warunek sprawdzajacy czy postac gracza jest w powietrzu
+    backgrounds = [] 
+    backgroundSpeed = 20; // predkosc przesuwania sie tla
     obstacles = [];
-    obstacleSpeed = 20; // predkosc poruszania sie przeszkod w strone gracza
+    obstacleSpeed = this.backgroundSpeed; // predkosc poruszania sie przeszkod w strone gracza
     gravity = 2; // sila przyciagania gracza do podloza
     score = 0; // punkty
     isOver = false; // warunek sprawdzajacy czy gra zostala skonczona
@@ -33,7 +35,18 @@ class Game {
         this.obstacle = new Image();
         this.obstacle.src = "fence.png"; // przeszkoda
 
-        this.ctx.drawImage(this.background, 0, 0);
+        let x1 = 0;
+        let y1 = this.canvas.height - this.background.height;
+
+        this.backgrounds.push({ // tworzenie pierwszej grafiki tla
+            img: this.background,
+            x: x1,
+            y: y1,
+            width: this.background.width,
+            height: this.background.height
+        });
+
+        // this.ctx.drawImage(this.background, 0, 0);
         this.setControls();
         this.startGame();
     };
@@ -72,18 +85,20 @@ class Game {
             }
         }
         update();
-        this.addObstacles(); // dodawanie przeszkod
+        this.addBackgrounds();
+        this.addObstacles();
     }
 
     updateGame = () => { // aktualizowanie gry
         this.gameOver();
         if (!this.isOver) {
+            this.drawBackgrounds();
             this.drawPlayer();
             this.drawObstacles();
             this.checkCollision();
             this.ctx.fillStyle = "white";
             this.ctx.font = "20px Verdana";
-            this.ctx.fillText("Score: " + this.score, 85, 25);
+            this.ctx.fillText("Score: " + this.score, 80, 30);
         }
     }
 
@@ -95,8 +110,8 @@ class Game {
     };
 
     drawPlayer = () => { // rysowanie postaci gracza oraz jej fizyka
-        this.clearCanvas();
-        this.ctx.drawImage(this.background, 0, 0);
+        // this.ctx.drawImage(this.background, 0, 0);
+
         if (this.drawPosX > this.canvas.width) {
             this.currentFrame = 0;
             this.drawPosX = 0;
@@ -112,8 +127,8 @@ class Game {
         }
         this.jumpStrength += this.gravity; // zmniejszanie sily skoku przez przyciaganie grawitacyjne
         // zabezpieczenie aby postac gracza nie wpadla pod podloge
-        this.drawPosY = Math.min(this.drawPosY + this.jumpStrength, this.canvas.height - this.playerFrameHeight);
-        if (this.drawPosY != 475) { // uniemozliwienie skoku w powietrzu
+        this.playerY = Math.min(this.playerY + this.jumpStrength, this.canvas.height - this.playerFrameHeight);
+        if (this.playerY != 475) { // uniemozliwienie skoku w powietrzu
             this.isJumping = true;
         }
         else {
@@ -121,12 +136,43 @@ class Game {
         }
         this.drawPosX += this.framesMax;
         // rysowanie postaci gracza
-        this.ctx.drawImage(this.player, cutX, 0, this.playerFrameWidth, this.playerFrameHeight, this.playerX, this.drawPosY, this.playerFrameWidth, this.playerFrameHeight);
+        this.ctx.drawImage(this.player, cutX, 0, this.playerFrameWidth, this.playerFrameHeight, this.playerX, this.playerY, this.playerFrameWidth, this.playerFrameHeight);
     };
 
-    addObstacles = () => {
+    addBackgrounds = () => { // tworzenie tla
+        let x = this.canvas.width;
+        let y = this.canvas.height - this.background.height;
+
+        this.backgrounds.push({ // tablica z tlami
+            img: this.background,
+            x: x,
+            y: y,
+            width: this.background.width,
+            height: this.background.height
+        });
+    }
+
+    drawBackgrounds = () => { // rysowanie tla
+        this.clearCanvas();
+        const backgroundsToDraw = [...this.backgrounds]; // tla oczekujace na narysowanie
+
+        backgroundsToDraw.forEach(background => {
+            this.ctx.drawImage(background.img, background.x, background.y); // rysowanie tla
+            background.x -= this.backgroundSpeed;
+
+            if (background.x == - 1000) {
+                this.addBackgrounds(); // dodawanie tla do tablicy
+            }
+
+            if (background.x + background.width < - 565) {
+                this.backgrounds.shift(); // usuwanie tla z tablicy
+            }
+        });
+    }
+
+    addObstacles = () => { // tworzenie przeszkod
         let x = this.canvas.width - 10;
-        let y = 500;
+        let y = this.canvas.height - this.obstacle.height;
 
         this.obstacles.push({ // tablica z przeszkodami
             img: this.obstacle,
@@ -138,10 +184,11 @@ class Game {
     }
 
     drawObstacles = () => { // rysowanie przeszkod
+
         const obstaclesToDraw = [...this.obstacles]; // przeszkody oczekujace na narysowanie
 
         obstaclesToDraw.forEach(obstacle => {
-            this.ctx.drawImage(obstacle.img, obstacle.x, this.canvas.height - this.obstacle.height); // rysowanie przeszkod
+            this.ctx.drawImage(obstacle.img, obstacle.x, obstacle.y); // rysowanie przeszkod
             obstacle.x -= this.obstacleSpeed;
 
             if (obstacle.x == 50) {
@@ -162,7 +209,7 @@ class Game {
             }
             // warunek sprawdzajacy czy przeszkoda nie dotknela gracza
             if (this.playerX + this.playerFrameWidth / 1.5 > obstacle.x && this.playerX <= obstacle.x + obstacle.width) {
-                if (this.drawPosY >= obstacle.y - obstacle.height / 1.5) {
+                if (this.playerY >= obstacle.y) {
                     this.isOver = true; // warunek zakonczenia gry 
                 }
                 else {
@@ -185,16 +232,28 @@ class Game {
             // wyswietlanie komunikatu koncowego
             this.ctx.fillStyle = "white";
             this.ctx.font = "20px Verdana";
-            this.ctx.fillText("Score: " + this.score, this.canvas.width / 2.2, this.canvas.height / 2 - 16);
-            this.ctx.fillText("Press R to restart", this.canvas.width / 2.5, this.canvas.height / 2 + 9);
+            this.ctx.fillText("Score: " + this.score, this.canvas.width / 2.2, this.canvas.height / 2 - 55);
+            this.ctx.fillText("Press R to restart", this.canvas.width / 2.5, this.canvas.height / 2 - 25);
         }
     }
 
     restartGame = () => { // resetowanie gry
         this.score = 0;
         this.drawPosX = 0;
-        this.drawPosY = 700;
+        this.playerY = 700;
+        this.backgrounds = [];
+        let x1 = 0;
+        let y1 = this.canvas.height - this.background.height;
+
+        this.backgrounds.push({ // pierwsza grafika tla
+            img: this.background,
+            x: x1,
+            y: y1,
+            width: this.background.width,
+            height: this.background.height
+        });
         this.obstacles = [];
+        this.addBackgrounds();
         this.addObstacles();
         this.isOver = false;
     }
