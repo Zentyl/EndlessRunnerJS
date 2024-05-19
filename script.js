@@ -30,13 +30,13 @@ class Game { // klasa gry
         this.canvas.height = 565;
 
         this.background = new Image();
-        this.background.src = "/img/background.png"; // tło
+        this.background.src = "img/background.png"; // tło
 
         this.player = new Image();
-        this.player.src = "/img/player.png"; // postać gracza
+        this.player.src = "img/player.png"; // postać gracza
 
         this.obstacle = new Image();
-        this.obstacle.src = "/img/fence.png"; // przeszkoda
+        this.obstacle.src = "img/fence.png"; // przeszkoda
 
         let x1 = 0;
         let y1 = this.canvas.height - this.background.height;
@@ -290,19 +290,19 @@ class Game { // klasa gry
 
     playSoundJump = () => { // włącz dźwięk skoku
         let soundJump = new Audio();
-        soundJump.src = "/audio/jump.mp3";
+        soundJump.src = "audio/jump.mp3";
         soundJump.play();
     };
 
     playSoundHit = () => { // włącz dźwięk uderzenia gracza w przeszkode
         let soundHit = new Audio();
-        soundHit.src = "/audio/hit.mp3";
+        soundHit.src = "audio/hit.mp3";
         soundHit.play();
     };
 
     playMusic = () => { // uruchom muzykę
         let music = new Audio();
-        music.src = "/audio/music.mp3";
+        music.src = "audio/music.mp3";
         music.addEventListener("ended", function () { // jeśli muzyka się skończyła, uruchom ją ponownie
             music.currentTime = 0;
             this.isMusic = false;
