@@ -11,14 +11,15 @@ class Game {
     playerX = 50; // pozycja gracza na osi X
     playerY = 700 - this.playerFrameHeight; // pozycja gracza na osi Y
     jumpStrength = 0; // sila skoku
-    isJumping = false; // warunek sprawdzajacy czy postac gracza jest w powietrzu
-    backgrounds = [] 
+    isJumping = false; // zmienna sprawdzajaca czy postac gracza jest w powietrzu
+    backgrounds = []
     backgroundSpeed = 20; // predkosc przesuwania sie tla
     obstacles = [];
     obstacleSpeed = this.backgroundSpeed; // predkosc poruszania sie przeszkod w strone gracza
     gravity = 2; // sila przyciagania gracza do podloza
     score = 0; // punkty
-    isOver = false; // warunek sprawdzajacy czy gra zostala skonczona
+    isStarted = false; // zmienna sprawdzajaca czy gra zostala rozpoczeta
+    isOver = false; // zmienna sprawdzajaca czy gra zostala skonczona
 
     init = () => { // konstruktor
         this.canvas = document.querySelector("canvas");
@@ -46,11 +47,20 @@ class Game {
             height: this.background.height
         });
 
-        // this.ctx.drawImage(this.background, 0, 0);
         this.setControls();
         this.startGame();
     };
 
+
+    titleScreen = () => { // ekran tytulowy gry
+        if (!this.isStarted) { // wyswietlanie ekranu tytulowego dopoki gracz nie wcisnie R
+            this.clearCanvas();
+            this.ctx.drawImage(this.background, 0, 0);
+            this.ctx.fillStyle = "white";
+            this.ctx.font = "20px Verdana";
+            this.ctx.fillText("Press R to start", this.canvas.width / 2.5, this.canvas.height / 2 - 37);
+        }
+    }
 
     setControls = () => { // ustawienie sterowania
         document.addEventListener("click", this.playerJump);
@@ -81,12 +91,14 @@ class Game {
 
             if (delta > interval) {
                 this.updateGame();
+                this.titleScreen(); // wyswietlanie ekranu tytulowego
                 then = now - (delta % interval);
             }
         }
         update();
         this.addBackgrounds();
         this.addObstacles();
+
     }
 
     updateGame = () => { // aktualizowanie gry
@@ -238,6 +250,7 @@ class Game {
     }
 
     restartGame = () => { // resetowanie gry
+        this.isStarted = true;
         this.score = 0;
         this.drawPosX = 0;
         this.playerY = 700;
