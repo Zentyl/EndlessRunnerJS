@@ -17,7 +17,8 @@ class Game { // klasa gry
     obstacles = [];
     obstacleSpeed = 15; // prędkość poruszania się przeszkod w strone gracza
     gravity = 2; // sila przyciągania gracza do podloza
-    score = 0; // punkty
+    score = 0; // punkty gracza
+    highScore = 0; // rekord największej ilości punktów zdobytych przez gracza
     isStarted = false; // zmienna sprawdzająca czy gra zostala rozpoczęta
     isOver = false; // zmienna sprawdzająca czy gra zostala skończona
     isMusic = false;
@@ -64,7 +65,7 @@ class Game { // klasa gry
                 this.restartGame();
             }
         });
-    }
+    };
 
     startGame = () => {  // rozpoczęcie gry
         // ustawienie częstotliwości wyswietlania klatek
@@ -89,7 +90,7 @@ class Game { // klasa gry
         console.log(this.obstacleSpeed);
         this.addBackgrounds();
         this.addObstacles();
-    }
+    };
 
     updateGame = () => { // aktualizowanie gry
         this.gameOver();
@@ -102,7 +103,7 @@ class Game { // klasa gry
             this.ctx.font = "20px Verdana";
             this.ctx.fillText("Score: " + this.score, 80, 55);
         }
-    }
+    };
 
     titleScreen = () => { // ekran tytułowy gry
         if (!this.isStarted) { // wyświetlanie ekranu tytułowego dopóki gracz nie wciśnie Enter
@@ -112,7 +113,7 @@ class Game { // klasa gry
             this.ctx.font = "20px Verdana";
             this.ctx.fillText("Press Enter to start", this.canvas.width / 2.5, this.canvas.height / 2 - 37);
         }
-    }
+    };
 
     drawPlayer = () => { // rysowanie postaci gracza oraz jej fizyka
         if (this.drawPosX > this.canvas.width) {
@@ -161,7 +162,7 @@ class Game { // klasa gry
             width: this.background.width,
             height: this.background.height
         });
-    }
+    };
 
     drawBackgrounds = () => { // rysowanie tła
         this.clearCanvas();
@@ -179,7 +180,7 @@ class Game { // klasa gry
                 this.backgrounds.shift(); // usuwanie tła z tablicy
             }
         });
-    }
+    };
 
     addObstacles = () => { // tworzenie przeszkod
         let x = this.canvas.width - 10;
@@ -192,7 +193,7 @@ class Game { // klasa gry
             width: this.obstacle.width,
             height: this.obstacle.height
         });
-    }
+    };
 
     drawObstacles = () => { // rysowanie przeszkód
         const obstaclesToDraw = [...this.obstacles]; // przeszkody oczekujace na narysowanie
@@ -210,13 +211,16 @@ class Game { // klasa gry
                 this.obstacles.shift(); // usuwanie przeszkód z tablicy
             }
         });
-    }
+    };
 
     checkCollision = () => { // sprawdzanie kolizji przeszkody z graczem
         const obstaclesToCheck = [...this.obstacles]; // przeszkody oczekujace na sprawdzenie kolizji
         obstaclesToCheck.forEach(obstacle => {
             if (obstacle.x == this.playerX) {
                 this.score++; // jeśli gracz przeskoczył przeszkodę dodaj punkt
+                if (this.highScore <= this.score) {
+                    this.highScore = this.score;
+                }
                 if (this.score % 15 == 0) { // zwiększ prędkość ruchu przeszkód gdy ilość zdobytych punktow to wielokrotność 15
                     if (this.obstacleSpeed == 15) {
                         this.obstacleSpeed = 20;
@@ -247,10 +251,11 @@ class Game { // klasa gry
             // wyswietlanie komunikatu końcowego
             this.ctx.fillStyle = "white";
             this.ctx.font = "20px Verdana";
-            this.ctx.fillText("Score: " + this.score, this.canvas.width / 2.5, this.canvas.height / 2 - 55);
-            this.ctx.fillText("Press Enter to restart", this.canvas.width / 2.5, this.canvas.height / 2 - 25);
+            this.ctx.fillText("Score: " + this.score, this.canvas.width / 2.5, this.canvas.height / 2 - 70);
+            this.ctx.fillText("High score: " + this.highScore, this.canvas.width / 2.5, this.canvas.height / 2 - 40);
+            this.ctx.fillText("Press Enter to restart", this.canvas.width / 2.5, this.canvas.height / 2 - 10);
         }
-    }
+    };
 
     clearCanvas = () => { // czyszczenie canvy
         this.ctx.fillStyle = "white";
@@ -281,19 +286,19 @@ class Game { // klasa gry
         this.addObstacles();
         this.isOver = false;
         this.obstacleSpeed = 15;
-    }
+    };
 
     playSoundJump = () => { // włącz dźwięk skoku
         let soundJump = new Audio();
         soundJump.src = "/audio/jump.mp3";
         soundJump.play();
-    }
+    };
 
     playSoundHit = () => { // włącz dźwięk uderzenia gracza w przeszkode
         let soundHit = new Audio();
         soundHit.src = "/audio/hit.mp3";
         soundHit.play();
-    }
+    };
 
     playMusic = () => { // uruchom muzykę
         let music = new Audio();
@@ -305,12 +310,12 @@ class Game { // klasa gry
         });
         music.play();
         this.isMusic = true; // muzyka jest uruchomiona
-    }
+    };
 }
 
 const game = new Game(); // utworzenie obiektu gry
 
-// Źródła grafik i muzyki:
+// Źródła grafik i audio:
 // https://pop-shop-packs.itch.io/cats-pixel-asset-pack
 // https://www.deviantart.com/etherealdragon/art/Fence-Tile-388637295
 // https://free-game-assets.itch.io/free-summer-pixel-art-backgrounds
