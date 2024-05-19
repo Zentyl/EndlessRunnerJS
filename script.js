@@ -28,13 +28,13 @@ class Game {
         this.canvas.height = 565;
 
         this.background = new Image();
-        this.background.src = "background.png"; // tlo
+        this.background.src = "/img/background.png"; // tlo
 
         this.player = new Image();
-        this.player.src = "player.png"; // postac gracza
+        this.player.src = "/img/player.png"; // postac gracza
 
         this.obstacle = new Image();
-        this.obstacle.src = "fence.png"; // przeszkoda
+        this.obstacle.src = "/img/fence.png"; // przeszkoda
 
         let x1 = 0;
         let y1 = this.canvas.height - this.background.height;
