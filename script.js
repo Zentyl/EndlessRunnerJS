@@ -18,10 +18,10 @@ class Game { // klasa gry
     obstacleSpeed = 15; // prędkość poruszania się przeszkod w strone gracza
     gravity = 2; // sila przyciągania gracza do podloza
     score = 0; // punkty gracza
-    highScore = 0; // rekord największej ilości punktów zdobytych przez gracza
+    newHighScore = false; // zmienna sprawdzająca czy nowy rekord został ustanowiony
     isStarted = false; // zmienna sprawdzająca czy gra zostala rozpoczęta
     isOver = false; // zmienna sprawdzająca czy gra zostala skończona
-    isMusic = false;
+    isMusic = false; // zmienna sprawdzająca czy gra muzyka
 
     init = () => { // konstruktor
         this.canvas = document.querySelector("canvas");
@@ -87,7 +87,6 @@ class Game { // klasa gry
             }
         }
         update();
-        console.log(this.obstacleSpeed);
         this.addBackgrounds();
         this.addObstacles();
     };
@@ -199,7 +198,6 @@ class Game { // klasa gry
         const obstaclesToDraw = [...this.obstacles]; // przeszkody oczekujace na narysowanie
 
         obstaclesToDraw.forEach(obstacle => {
-            console.log(obstacle.x);
             this.ctx.drawImage(obstacle.img, obstacle.x, obstacle.y); // rysowanie przeszkód
             obstacle.x -= this.obstacleSpeed;
 
@@ -218,9 +216,6 @@ class Game { // klasa gry
         obstaclesToCheck.forEach(obstacle => {
             if (obstacle.x == this.playerX) {
                 this.score++; // jeśli gracz przeskoczył przeszkodę dodaj punkt
-                if (this.highScore <= this.score) {
-                    this.highScore = this.score;
-                }
                 if (this.score % 15 == 0) { // zwiększ prędkość ruchu przeszkód gdy ilość zdobytych punktow to wielokrotność 15
                     if (this.obstacleSpeed == 15) {
                         this.obstacleSpeed = 20;
@@ -247,12 +242,13 @@ class Game { // klasa gry
     gameOver = () => { // funkcja kończąca grę
         if (this.isOver) {
             this.clearCanvas();
+            this.checkHighscore();
             this.ctx.drawImage(this.background, 0, 0);
             // wyswietlanie komunikatu końcowego
             this.ctx.fillStyle = "white";
             this.ctx.font = "20px Verdana";
             this.ctx.fillText("Score: " + this.score, this.canvas.width / 2.5, this.canvas.height / 2 - 70);
-            this.ctx.fillText("High score: " + this.highScore, this.canvas.width / 2.5, this.canvas.height / 2 - 40);
+            this.ctx.fillText("High score: " + this.getHighScore(), this.canvas.width / 2.5, this.canvas.height / 2 - 40);
             this.ctx.fillText("Press Enter to restart", this.canvas.width / 2.5, this.canvas.height / 2 - 10);
         }
     };
@@ -261,6 +257,23 @@ class Game { // klasa gry
         this.ctx.fillStyle = "white";
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     };
+
+    getHighScore = () => { // pobierz zapisany lokalnie rekord i go zwróć
+        this.highScore = localStorage.getItem('catHighScore');
+        if(this.highScore) {
+            return parseInt(this.highScore);
+        }
+        else {
+            return 0;
+        }
+    }
+
+    checkHighscore = () => { // sprawdź czy został ustanowiony nowy rekord i go zapisz lokalnie
+        if(this.getHighScore() < this.score) {
+            localStorage.setItem('catHighScore', this.score);
+            this.newHighScore = true;
+        }
+    }
 
     restartGame = () => { // restartowanie gry
         if (!this.isMusic) { // jeśli nie gra muzyka, uruchom muzykę
