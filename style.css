@@ -18,4 +18,13 @@ body {
 
 .title {
     font-size: 1.5rem;
+    margin-right: 1rem;
+}
+
+.controls {
+    margin-right: 1rem;
+}
+
+.canvas {
+    width: 100%;
 }
